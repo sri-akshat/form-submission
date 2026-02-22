@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "ITR Form Assistant",
+  "version": "0.1.0",
+  "description": "MVP extension scaffold for assisted ITR filing",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://*.incometax.gov.in/*"
+  ],
+  "background": {
+    "service_worker": "../background/worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "../popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.incometax.gov.in/*"],
+      "js": ["../content/content-entry.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

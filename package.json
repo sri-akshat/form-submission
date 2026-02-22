@@ -1,0 +1,13 @@
+{
+  "name": "form-submission",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sprint 1 scaffold for ITR form assistant Chrome extension",
+  "scripts": {
+    "test": "node --test tests/unit/*.test.js tests/integration/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
