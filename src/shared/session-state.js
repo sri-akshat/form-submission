@@ -11,7 +11,11 @@ export function createSession(sessionId, nowIso = new Date().toISOString()) {
     createdAt: nowIso,
     updatedAt: nowIso,
     portalContext: null,
-    form16Data: null
+    form16Data: null,
+    aisData: null,
+    normalizedData: null,
+    fillPlan: null,
+    planValidation: null
   };
 }
 

@@ -12,6 +12,12 @@ export function createWorkerBindings(orchestrator = new SessionOrchestrator()) {
   router.register(MESSAGE_TYPES.UPLOAD_FORM16_TEXT, (payload) =>
     orchestrator.parseForm16(payload.form16Text || '')
   );
+  router.register(MESSAGE_TYPES.UPLOAD_AIS_TEXT, (payload) =>
+    orchestrator.parseAis(payload.aisText || '')
+  );
+  router.register(MESSAGE_TYPES.GENERATE_FILL_PLAN, (payload) =>
+    orchestrator.generateFillPlan({ itrType: payload.itrType || 'ITR1' })
+  );
 
   return { router, orchestrator };
 }
