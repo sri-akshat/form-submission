@@ -18,6 +18,13 @@ export function createWorkerBindings(orchestrator = new SessionOrchestrator()) {
   router.register(MESSAGE_TYPES.GENERATE_FILL_PLAN, (payload) =>
     orchestrator.generateFillPlan({ itrType: payload.itrType || 'ITR1' })
   );
+  router.register(MESSAGE_TYPES.RUN_AUTOFILL_SALARY_PAGE, (payload) =>
+    orchestrator.runSalaryAutofill({
+      documentRef: payload.documentRef,
+      maxRetries: payload.maxRetries ?? 2
+    })
+  );
+  router.register(MESSAGE_TYPES.GET_SESSION_STATE, () => orchestrator.getState());
 
   return { router, orchestrator };
 }

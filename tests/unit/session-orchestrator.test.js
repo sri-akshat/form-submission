@@ -91,3 +91,35 @@ test('SessionOrchestrator generateFillPlan returns validated deterministic plan'
   assert.equal(result.fillPlan.actions.some((action) => action.fieldKey === 'salary.gross'), true);
   assert.equal(orchestrator.getAuditEvents().at(-1).eventType, 'FILL_PLAN_VALIDATED');
 });
+
+test('SessionOrchestrator runSalaryAutofill stores executor result and writes audit events', () => {
+  const orchestrator = new SessionOrchestrator({
+    nowMs: () => 1700000000005,
+    nowIso: () => '2026-02-22T10:00:00.000Z',
+    autofillExecutor: () => ({
+      ok: true,
+      reason: 'COMPLETED',
+      totalActions: 2,
+      successCount: 2,
+      failedCount: 0,
+      skippedCount: 0,
+      results: []
+    })
+  });
+
+  orchestrator.startSession();
+  orchestrator.parseForm16(
+    'Name: User\\nPAN: ABCDE1234F\\nAssessment Year: 2025-26\\nGross Salary: 1000000\\nTaxable Income: 900000\\nDeductor: Employer - TDS: 100000'
+  );
+  orchestrator.parseAis('PAN: ABCDE1234F\\nAssessment Year: 2025-26\\nTotal TDS: 100000');
+  orchestrator.generateFillPlan({ itrType: 'ITR1' });
+
+  const result = orchestrator.runSalaryAutofill();
+
+  assert.equal(result.ok, true);
+  assert.equal(orchestrator.getState().lastAutofillResult.ok, true);
+
+  const eventTypes = orchestrator.getAuditEvents().map((event) => event.eventType);
+  assert.equal(eventTypes.includes('AUTOFILL_SALARY_STARTED'), true);
+  assert.equal(eventTypes.includes('AUTOFILL_SALARY_COMPLETED'), true);
+});

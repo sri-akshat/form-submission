@@ -4,12 +4,58 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ITR Assistant</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        min-width: 360px;
+        margin: 12px;
+      }
+      main {
+        display: grid;
+        gap: 10px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      button {
+        padding: 6px 10px;
+      }
+      pre {
+        white-space: pre-wrap;
+        background: #f4f4f4;
+        padding: 8px;
+        border-radius: 4px;
+        max-height: 180px;
+        overflow: auto;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 4px 0;
+      }
+    </style>
   </head>
   <body>
     <main>
       <h1>ITR Assistant</h1>
-      <button id="start-session" type="button">Start Session</button>
+      <div class="actions">
+        <button id="start-session" type="button">Start Session</button>
+        <button id="generate-plan" type="button">Generate Plan</button>
+        <button id="run-salary-autofill" type="button">Run Salary Autofill</button>
+        <button id="refresh-summary" type="button">Refresh Summary</button>
+      </div>
       <p id="status">Idle</p>
+
+      <section>
+        <h2>Validation Warnings</h2>
+        <pre id="warnings">No warnings</pre>
+      </section>
+
+      <section>
+        <h2>Explainability Actions</h2>
+        <pre id="actions">No plan generated</pre>
+      </section>
     </main>
     <script type="module" src="./app.js"></script>
   </body>

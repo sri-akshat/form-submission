@@ -1,4 +1,5 @@
 import { AuditLog, AUDIT_EVENT_TYPES } from '../audit/audit-log.js';
+import { runSalaryAutofill } from '../content/autofill-runner.js';
 import { parseAisText } from '../extraction/ais-parser.js';
 import { parseForm16Text } from '../extraction/form16-parser.js';
 import {
@@ -13,9 +14,14 @@ function makeSessionId(now = Date.now) {
 }
 
 export class SessionOrchestrator {
-  constructor({ nowIso = () => new Date().toISOString(), nowMs = () => Date.now() } = {}) {
+  constructor({
+    nowIso = () => new Date().toISOString(),
+    nowMs = () => Date.now(),
+    autofillExecutor = runSalaryAutofill
+  } = {}) {
     this.nowIso = nowIso;
     this.nowMs = nowMs;
+    this.autofillExecutor = autofillExecutor;
     this.session = null;
     this.auditLog = null;
   }
@@ -130,6 +136,47 @@ export class SessionOrchestrator {
         canExecute: validation.canExecute
       }
     };
+  }
+
+  runSalaryAutofill({ documentRef, maxRetries = 2 } = {}) {
+    this.#ensureSession();
+
+    if (!this.session.fillPlan) {
+      throw new Error('Fill plan not generated. Call generateFillPlan first.');
+    }
+
+    if (!this.session.planValidation?.canExecute) {
+      throw new Error('Fill plan has blocking issues. Resolve validation before autofill.');
+    }
+
+    this.auditLog.append(AUDIT_EVENT_TYPES.AUTOFILL_SALARY_STARTED, {
+      actionCount: this.session.fillPlan.actions.filter((action) => action.pageId === 'SALARY').length
+    });
+
+    const result = this.autofillExecutor({
+      documentRef,
+      fillPlan: this.session.fillPlan,
+      maxRetries
+    });
+
+    this.session = withStatus(
+      this.session,
+      this.session.status,
+      {
+        lastAutofillResult: result
+      },
+      this.nowIso()
+    );
+
+    this.auditLog.append(AUDIT_EVENT_TYPES.AUTOFILL_SALARY_COMPLETED, {
+      ok: result.ok,
+      totalActions: result.totalActions,
+      successCount: result.successCount,
+      failedCount: result.failedCount,
+      skippedCount: result.skippedCount
+    });
+
+    return result;
   }
 
   failSafe(errorMessage) {
